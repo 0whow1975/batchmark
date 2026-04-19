@@ -46,6 +46,13 @@ def test_annotate_results_empty():
     assert annotate_results([]) == []
 
 
+def test_annotate_results_preserves_result():
+    """Ensure annotated results retain a reference to the original BenchmarkResult."""
+    r = make_result(command="ls", size=42, mean=3.14)
+    annotated = annotate_results([r], label="check")
+    assert annotated[0].result is r
+
+
 def test_group_by_label():
     r1 = make_result(size=100)
     r2 = make_result(size=200)
