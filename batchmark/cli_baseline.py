@@ -42,6 +42,9 @@ def run_baseline(args: argparse.Namespace) -> int:
 
     if args.subcommand == "compare":
         current = load_results(args.history_file, tag=args.history_tag)
+        if not current:
+            print("No current results found for the given history file/tag.", file=sys.stderr)
+            return 1
         baseline = load_baseline(args.baseline_file, tag=args.baseline_tag)
         if not baseline:
             print("Baseline is empty or not found.", file=sys.stderr)
