@@ -19,7 +19,19 @@ def detect_regressions(
     current: List[BenchmarkResult],
     threshold: float = 0.10,
 ) -> List[RegressionResult]:
-    """Compare current results against baseline, flagging regressions."""
+    """Compare current results against baseline, flagging regressions.
+
+    Args:
+        baseline: List of benchmark results from the baseline run.
+        current: List of benchmark results from the current run.
+        threshold: Fractional increase in mean time that constitutes a
+            regression (default 0.10 = 10%).
+
+    Returns:
+        A list of RegressionResult entries for every (command, size) pair
+        present in both runs with valid timing data.  Entries whose
+        percentage change exceeds *threshold* are marked as regressions.
+    """
     baseline_map = {
         (r.command, r.size): r
         for r in baseline
@@ -62,3 +74,23 @@ def render_regression_table(rows: List[RegressionResult]) -> str:
             f"{r.pct_change:>7.1%} {flag:>6}"
         )
     return "\n".join(lines)
+
+
+def summary_stats(rows: List[RegressionResult]) -> dict:
+    """Return a summary dict with counts and the worst regression.
+
+    Args:
+        rows: Output from :func:`detect_regressions`.
+
+    Returns:
+        A dictionary with keys ``total``, ``regressions``, and
+        ``worst`` (the RegressionResult with the highest pct_change,
+        or ``None`` if *rows* is empty).
+    """
+    regressions = [r for r in rows if r.is_regression]
+    worst = max(rows, key=lambda r: r.pct_change) if rows else None
+    return {
+        "total": len(rows),
+        "regressions": len(regressions),
+        "worst": worst,
+    }
